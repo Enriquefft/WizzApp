@@ -24,7 +24,8 @@
 		"sonner": "^2.0.3",
 		"tailwind-merge": "^3.1.0",
 		"tailwindcss-animate": "^1.0.7",
-		"zod": "^3.24.2"
+		"zod": "^3.24.2",
+		"zustand": "^5.0.3"
 	},
 	"description": "Template for Next.js fullstack applications, my preferred framework for MVP'S.",
 	"devDependencies": {

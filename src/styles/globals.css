@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@plugin 'tailwindcss-animate';
+
 @custom-variant dark (&:is(.dark *));
 
 @theme {
@@ -30,30 +32,81 @@
 	--color-card: hsl(var(--card));
 	--color-card-foreground: hsl(var(--card-foreground));
 
+	--color-sidebar: hsl(var(--sidebar-background));
+	--color-sidebar-foreground: hsl(var(--sidebar-foreground));
+	--color-sidebar-primary: hsl(var(--sidebar-primary));
+	--color-sidebar-primary-foreground: hsl(var(--sidebar-primary-foreground));
+	--color-sidebar-accent: hsl(var(--sidebar-accent));
+	--color-sidebar-accent-foreground: hsl(var(--sidebar-accent-foreground));
+	--color-sidebar-border: hsl(var(--sidebar-border));
+	--color-sidebar-ring: hsl(var(--sidebar-ring));
+
+	--color-wizz: #5e60ce;
+	--color-wizz-light: #6930c3;
+	--color-wizz-dark: #5e60ce;
+
+	--color-wizz-gradient-from: #5390d9;
+	--color-wizz-gradient-to: #7400b8;
+
 	--radius-lg: var(--radius);
 	--radius-md: calc(var(--radius) - 2px);
 	--radius-sm: calc(var(--radius) - 4px);
 
 	--animate-accordion-down: accordion-down 0.2s ease-out;
 	--animate-accordion-up: accordion-up 0.2s ease-out;
-
-	--font-sans: var(--font-sans), ui-sans-serif, system-ui, sans-serif,
-		"Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+	--animate-fade-in: fade-in 0.3s ease-out;
+	--animate-fade-out: fade-out 0.3s ease-out;
+	--animate-slide-up: slide-up 0.4s ease-out;
 
 	@keyframes accordion-down {
 		from {
 			height: 0;
 		}
+
 		to {
 			height: var(--radix-accordion-content-height);
 		}
 	}
+
 	@keyframes accordion-up {
 		from {
 			height: var(--radix-accordion-content-height);
 		}
+
 		to {
 			height: 0;
+		}
+	}
+
+	@keyframes fade-in {
+		from {
+			opacity: 0;
+		}
+
+		to {
+			opacity: 1;
+		}
+	}
+
+	@keyframes fade-out {
+		from {
+			opacity: 1;
+		}
+
+		to {
+			opacity: 0;
+		}
+	}
+
+	@keyframes slide-up {
+		from {
+			transform: translateY(20px);
+			opacity: 0;
+		}
+
+		to {
+			transform: translateY(0);
+			opacity: 1;
 		}
 	}
 }
@@ -61,16 +114,18 @@
 @utility container {
 	margin-inline: auto;
 	padding-inline: 2rem;
+
 	@media (width >= --theme(--breakpoint-sm)) {
 		max-width: none;
 	}
+
 	@media (width >= 1400px) {
 		max-width: 1400px;
 	}
 }
 
 /*
-  The default border color has changed to `currentColor` in Tailwind CSS v4,
+  The default border color has changed to `currentcolor` in Tailwind CSS v4,
   so we've added these compatibility styles to make sure everything still
   looks the same as it did with Tailwind CSS v3.
 
@@ -83,147 +138,97 @@
 	::before,
 	::backdrop,
 	::file-selector-button {
-		border-color: var(--color-gray-200, currentColor);
+		border-color: var(--color-gray-200, currentcolor);
 	}
 }
 
+@utility wizz-gradient-bg {
+	@apply bg-linear-to-br from-wizz-gradient-from to-wizz-gradient-to;
+}
+
+@utility wizz-gradient-text {
+	@apply bg-clip-text text-transparent bg-linear-to-r from-wizz-gradient-from to-wizz-gradient-to;
+}
+
 @layer base {
-	/* Color Variables */
 	:root {
-		/* Base Colors */
-		--color-white: 0 0% 100%;
-		/* Update black to a softer dark for body text */
-		--color-black: 210 10% 25%;
-		/* Use a soft light blue for backgrounds */
-		--color-gray-light: 210 50% 95%;
-		--color-gray-medium: 0 0% 89.8%;
-		--color-gray-dark: 0 0% 45.1%;
-		/* Primary: Deep Vibrant Blue for trust & professionalism */
-		--color-primary: 220 90% 30%;
-		--color-primary-foreground: 0 0% 100%;
-		--color-destructive: 0 84.2% 60.2%;
-		--color-destructive-dark: 0 62.8% 30.6%;
-		--color-radius: 0.5rem;
+		--background: 250 33% 99%;
+		--foreground: 254 23% 20%;
 
-		--color-chart-1: 12 76% 61%;
-		--color-chart-2: 173 58% 39%;
-		--color-chart-3: 197 37% 24%;
-		--color-chart-4: 43 74% 66%;
-		--color-chart-5: 27 87% 67%;
+		--card: 0 0% 100%;
+		--card-foreground: 254 23% 20%;
 
-		--dark-color-white: 0 0% 98%;
-		--dark-color-black: 0 0% 3.9%;
-		--dark-color-gray-light: 0 0% 14.9%;
-		--dark-color-gray-medium: 0 0% 14.9%;
-		--dark-color-gray-dark: 0 0% 63.9%;
-		--dark-color-primary: 220 90% 30%;
-		--dark-color-primary-foreground: 0 0% 100%;
+		--popover: 0 0% 100%;
+		--popover-foreground: 254 23% 20%;
 
-		--dark-color-chart-1: 220 70% 50%;
-		--dark-color-chart-2: 160 60% 45%;
-		--dark-color-chart-3: 30 80% 55%;
-		--dark-color-chart-4: 280 65% 60%;
-		--dark-color-chart-5: 340 75% 55%;
+		--primary: 252 75% 59%;
+		--primary-foreground: 0 0% 100%;
 
-		/* Accent: Vibrant Turquoise for CTAs/links */
-		--accent: 174 70% 40%;
-		--accent-foreground: 0 0% 100%;
+		--secondary: 246 25% 94%;
+		--secondary-foreground: 254 23% 20%;
+
+		--muted: 246 25% 94%;
+		--muted-foreground: 255 10% 50%;
+
+		--accent: 246 25% 94%;
+		--accent-foreground: 254 23% 20%;
+
+		--destructive: 0 84.2% 60.2%;
+		--destructive-foreground: 210 40% 98%;
+
+		--border: 246 15% 90%;
+		--input: 246 15% 90%;
+		--ring: 252 75% 59%;
+
+		--radius: 0.5rem;
+
+		--sidebar-background: 0 0% 98%;
+		--sidebar-foreground: 240 5.3% 26.1%;
+		--sidebar-primary: 240 5.9% 10%;
+		--sidebar-primary-foreground: 0 0% 98%;
+		--sidebar-accent: 240 4.8% 95.9%;
+		--sidebar-accent-foreground: 240 5.9% 10%;
+		--sidebar-border: 220 13% 91%;
+		--sidebar-ring: 217.2 91.2% 59.8%;
 	}
 
-	/* Light Theme */
-	:root {
-		/* Base Colors */
-		--white: var(--color-white);
-		--black: var(--color-black);
-		--gray-light: var(--color-gray-light);
-		--gray-medium: var(--color-gray-medium);
-		--gray-dark: var(--color-gray-dark);
-		--primary-color: var(--color-primary);
-		--primary-foreground-color: var(--color-primary-foreground);
-		--destructive-color: var(--color-destructive);
-		--radius: var(--color-radius);
-
-		/* Backgrounds */
-		--background: hsl(210, 50%, 98%); /* Very light blue background */
-		--foreground: var(--black); /* Softer dark text */
-		--card-background: hsl(210, 50%, 98%);
-		--popover-background: hsl(210, 50%, 98%);
-
-		/* Foregrounds */
-		--card-foreground: var(--black);
-		--popover-foreground: var(--black);
-		--primary-foreground: var(--primary-foreground-color);
-		--secondary-foreground: var(--primary-color);
-		--muted-foreground: var(--gray-dark);
-		--accent-foreground: var(--primary-color);
-		--destructive-foreground: var(--primary-foreground-color);
-
-		/* Buttons */
-		--primary: var(--primary-color);
-		--secondary: hsl(210, 50%, 95%); /* Soft light blue for secondary buttons */
-		--muted: var(--gray-light);
-		--accent: hsl(174, 70%, 40%); /* Vibrant turquoise accent */
-		--destructive: var(--destructive-color);
-
-		/* Borders and Inputs */
-		--border: var(--gray-medium);
-		--input: var(--gray-medium);
-		--ring: var(--black);
-
-		/* Charts */
-		--chart-1: var(--color-chart-1);
-		--chart-2: var(--color-chart-2);
-		--chart-3: var(--color-chart-3);
-		--chart-4: var(--color-chart-4);
-		--chart-5: var(--color-chart-5);
-	}
-
-	/* Dark Theme */
 	.dark {
-		/* Base Colors */
-		--white: var(--dark-color-white);
-		--black: var(--dark-color-black);
-		--gray-light: var(--dark-color-gray-light);
-		--gray-medium: var(--dark-color-gray-medium);
-		--gray-dark: var(--dark-color-gray-dark);
-		/* Use the same primary color in dark mode for brand consistency */
-		--primary-color: var(--color-primary);
-		--primary-foreground-color: var(--color-primary-foreground);
-		--destructive-color: var(--color-destructive-dark);
+		--background: 254 23% 10%;
+		--foreground: 246 25% 94%;
 
-		/* Backgrounds */
-		--background: var(--black);
-		--foreground: var(--white);
-		--card-background: var(--black);
-		--popover-background: var(--black);
+		--card: 254 23% 13%;
+		--card-foreground: 246 25% 94%;
 
-		/* Foregrounds */
-		--card-foreground: var(--white);
-		--popover-foreground: var(--white);
-		--primary-foreground: var(--primary-foreground-color);
-		--secondary-foreground: var(--white);
-		--muted-foreground: var(--gray-dark);
-		--accent-foreground: var(--white);
-		--destructive-foreground: var(--white);
+		--popover: 254 23% 13%;
+		--popover-foreground: 246 25% 94%;
 
-		/* Buttons */
-		--primary: var(--primary-color);
-		--secondary: var(--gray-light);
-		--muted: var(--gray-light);
-		--accent: hsl(174, 70%, 40%);
-		--destructive: var(--destructive-color);
+		--primary: 252 75% 59%;
+		--primary-foreground: 246 25% 94%;
 
-		/* Borders and Inputs */
-		--border: var(--gray-medium);
-		--input: var(--gray-medium);
-		--ring: var(--white);
+		--secondary: 254 23% 18%;
+		--secondary-foreground: 246 25% 94%;
 
-		/* Charts */
-		--chart-1: var(--dark-color-chart-1);
-		--chart-2: var(--dark-color-chart-2);
-		--chart-3: var(--dark-color-chart-3);
-		--chart-4: var(--dark-color-chart-4);
-		--chart-5: var(--dark-color-chart-5);
+		--muted: 254 23% 18%;
+		--muted-foreground: 255 10% 70%;
+
+		--accent: 254 23% 18%;
+		--accent-foreground: 246 25% 94%;
+
+		--destructive: 0 62.8% 30.6%;
+		--destructive-foreground: 246 25% 94%;
+
+		--border: 254 23% 20%;
+		--input: 254 23% 20%;
+		--ring: 252 75% 59%;
+
+		--sidebar-background: 240 5.9% 10%;
+		--sidebar-foreground: 240 4.8% 95.9%;
+		--sidebar-primary: 224.3 76.3% 48%;
+		--sidebar-primary-foreground: 0 0% 100%;
+		--sidebar-accent: 240 3.7% 15.9%;
+		--sidebar-accent-foreground: 240 4.8% 95.9%;
+		--sidebar-border: 240 3.7% 15.9%;
+		--sidebar-ring: 217.2 91.2% 59.8%;
 	}
 }
 
@@ -231,7 +236,30 @@
 	* {
 		@apply border-border;
 	}
+
 	body {
-		@apply bg-background text-foreground;
+		@apply bg-background text-foreground antialiased;
+		font-feature-settings: "rlig" 1, "calt" 1;
+	}
+
+	h1,
+	h2,
+	h3,
+	h4,
+	h5,
+	h6 {
+		@apply font-semibold;
+	}
+
+	h1 {
+		@apply text-4xl md:text-5xl;
+	}
+
+	h2 {
+		@apply text-3xl md:text-4xl;
+	}
+
+	h3 {
+		@apply text-2xl md:text-3xl;
 	}
 }
