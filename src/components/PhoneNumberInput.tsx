@@ -1,6 +1,6 @@
 "use client";
 import { Smartphone } from "lucide-react";
-import React, { FormEvent, useState } from "react";
+import React, { type FormEvent, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

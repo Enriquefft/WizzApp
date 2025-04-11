@@ -1,23 +1,8 @@
-import {
-	ArrowDown,
-	MessageSquare,
-	Phone,
-	QrCode,
-	Shield,
-	Users,
-} from "lucide-react";
+import { MessageSquare, Phone, QrCode, Shield, Users } from "lucide-react";
 import React from "react";
-import { Button } from "@/components/ui/button";
-import { useApp } from "@/context/AppContext";
 import PhoneNumberInput from "./PhoneNumberInput";
 
 const LandingPage: React.FC = () => {
-	const { setAppState } = useApp();
-
-	const startApp = () => {
-		setAppState("login");
-	};
-
 	return (
 		<div className="min-h-screen flex flex-col">
 			{/* Hero Section */}

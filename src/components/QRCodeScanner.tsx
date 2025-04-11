@@ -51,6 +51,11 @@ const QRCodeScanner: React.FC = () => {
 						<div
 							className="bg-white w-64 h-64 my-4 rounded-lg border flex items-center justify-center overflow-hidden"
 							onClick={simulateQRScan} // This is just for demo purposes
+							onKeyDown={(e) => {
+								if (e.key === "Enter") {
+									simulateQRScan();
+								}
+							}}
 						>
 							{isRefreshing ? (
 								<RefreshCw className="animate-spin text-wizz" size={48} />
@@ -61,7 +66,7 @@ const QRCodeScanner: React.FC = () => {
 										<div className="grid grid-cols-5 grid-rows-5 gap-2 w-48 h-48 p-2">
 											{Array.from({ length: 25 }).map((_, i) => (
 												<div
-													key={i}
+													key={i.toString()}
 													className={`${Math.random() > 0.6 ? "bg-black" : "bg-transparent"} ${
 														// Always show corners
 														i === 0 || i === 4 || i === 20 || i === 24
