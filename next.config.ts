@@ -2,21 +2,12 @@ import type { NextConfig } from "next";
 
 import "./src/env.ts";
 const nextConfig: NextConfig = {
-	webpack: (config, { webpack }) => {
-		config.plugins.push(
-			new webpack.DefinePlugin({
-				"process.env.FLUENTFFMPEG_COV": false,
-			}),
-		);
-
-		return config;
-	},
-
 	eslint: {
 		// Warning: This allows production builds to successfully complete even if
 		// your project has ESLint errors.
 		ignoreDuringBuilds: true,
 	},
+
 	experimental: {
 		// typedRoutes: true,
 	},
@@ -37,8 +28,17 @@ const nextConfig: NextConfig = {
 		];
 	},
 	skipTrailingSlashRedirect: true,
-	// This is required to support PostHog trailing slash API requests
 	transpilePackages: ["@t3-oss/env-nextjs", "@t3-oss/env-core"],
+	// This is required to support PostHog trailing slash API requests
+	webpack: (config, { webpack }) => {
+		config.plugins.push(
+			new webpack.DefinePlugin({
+				"process.env.FLUENTFFMPEG_COV": false,
+			}),
+		);
+
+		return config;
+	},
 };
 
 export default nextConfig;
