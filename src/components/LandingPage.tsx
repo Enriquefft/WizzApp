@@ -103,7 +103,7 @@ const LandingPage: React.FC = () => {
 			</section>
 
 			{/* Main Feature Section */}
-			<section className="py-20 px-4">
+			<section className="py-20 px-4 bg-secondary/50 flex flex-col items-center space-y-12">
 				<div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center gap-8">
 					<div className="md:w-1/2">
 						<h2 className="text-3xl md:text-4xl font-bold mb-6">
@@ -135,7 +135,7 @@ const LandingPage: React.FC = () => {
 				<div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center gap-8">
 					<div className="md:w-1/2">
 						<h2 className="text-3xl md:text-4xl font-bold mb-6">
-							DM Everyone for
+							DM Everyone for{" "}
 							<span className="wizz-gradient-text">Maximum conversions</span>
 						</h2>
 						<p className="text-lg text-muted-foreground mb-6">
