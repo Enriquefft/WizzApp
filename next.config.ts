@@ -2,6 +2,16 @@ import type { NextConfig } from "next";
 
 import "./src/env.ts";
 const nextConfig: NextConfig = {
+	webpack: (config, { webpack }) => {
+		config.plugins.push(
+			new webpack.DefinePlugin({
+				"process.env.FLUENTFFMPEG_COV": false,
+			}),
+		);
+
+		return config;
+	},
+
 	eslint: {
 		// Warning: This allows production builds to successfully complete even if
 		// your project has ESLint errors.
