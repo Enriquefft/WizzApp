@@ -1,12 +1,11 @@
+import { useQuery } from "@tanstack/react-query";
+import React, { useState } from "react";
+import { toast } from "sonner";
 import {
-	AtSign,
-	ChevronRight,
-	LogOut,
-	MessageCircle,
-	PhoneCall,
-	Users,
-} from "lucide-react";
-import React from "react";
+	listAllGroups,
+	sendDmToGroupMembers,
+	tagEveryone,
+} from "@/actions/wsp";
 import { Button } from "@/components/ui/button";
 import {
 	Card,
@@ -16,159 +15,163 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { useApp } from "@/context/AppContext";
 
+type ActionStatus = {
+	tag: boolean;
+	dm: boolean;
+};
+
 const Dashboard: React.FC = () => {
-	const { phoneNumber, groupName, setGroupName, tagEveryone, setAppState } =
-		useApp();
+	const { setAppState, clientId } = useApp();
+
+	const [actionStatus, setActionStatus] = useState<
+		Record<string, ActionStatus>
+	>({});
+	const fetchGroups = async (clientId: string) => {
+		const data = await listAllGroups(clientId);
+		// Process status if needed:
+		const initialStatus: Record<string, ActionStatus> = {};
+		data.forEach((group) => {
+			initialStatus[group.id] = { dm: false, tag: false };
+		});
+		setActionStatus(initialStatus);
+
+		return data;
+	};
+
+	const {
+		data: groups,
+		error,
+		isFetching,
+	} = useQuery({
+		queryFn: () => fetchGroups(clientId),
+		queryKey: ["groups", clientId],
+		refetchOnMount: false, // cached permanently unless invalidated manually
+		refetchOnWindowFocus: false, // do not refetch on mount
+		staleTime: Infinity, // do not refetch on window focus
+	});
+
+	// data will be undefined on first render while fetching
+	if (isFetching) return <div>Loading groups...</div>;
+	if (error || !groups)
+		return <div>Error fetching groups: {(error as Error).message}</div>;
+
+	// Handles tagging everyone in a group
+	const handleTagEveryone = async (groupId: string) => {
+		setActionStatus((prev) => ({
+			...prev,
+			[groupId]: { dm: prev[groupId]?.dm ?? false, tag: true },
+		}));
+
+		try {
+			await tagEveryone(clientId, groupId, "HI");
+			toast.success(`Successfully tagged everyone in group ${groupId}.`);
+		} catch (error: unknown) {
+			if (error instanceof Error) toast.error(error.message);
+		} finally {
+			setActionStatus((prev) => ({
+				...prev,
+				[groupId]: { dm: prev[groupId]?.dm ?? false, tag: false },
+			}));
+		}
+	};
+
+	// Handles sending DM to all group members
+	const handleSendDM = async (groupId: string) => {
+		setActionStatus((prev) => ({
+			...prev,
+			[groupId]: { dm: true, tag: prev[groupId]?.tag ?? false },
+		}));
+
+		try {
+			await sendDmToGroupMembers(
+				clientId,
+				groupId,
+				"Hello, this is a direct message!",
+			);
+			toast.success(`Direct message sent to group ${groupId}.`);
+		} catch (error: unknown) {
+			if (error instanceof Error) toast.error(error.message);
+		} finally {
+			setActionStatus((prev) => ({
+				...prev,
+				[groupId]: { dm: false, tag: prev[groupId]?.tag ?? false },
+			}));
+		}
+	};
 
 	const handleLogout = () => {
-		setAppState("login");
+		if (typeof window !== "undefined") {
+			sessionStorage.setItem("clientId", "false");
+		}
+		setAppState("landing");
 	};
 
 	return (
-		<div className="w-full max-w-3xl animate-slide-up">
+		<div className="w-full max-w-3xl mx-auto p-4">
+			{/* Header Section */}
 			<div className="flex items-center justify-between mb-8">
-				<div>
-					<h1 className="text-2xl font-bold flex items-center">
-						<span className="wizz-gradient-text">WizzApp</span>
-						<span className="ml-2 text-sm bg-secondary text-secondary-foreground px-2 py-0.5 rounded">
-							Dashboard
-						</span>
-					</h1>
-					<p className="text-sm text-muted-foreground mt-1">
-						Connected to{" "}
-						{phoneNumber.replace(/(\d{3})(\d{3})(\d{4})/, "($1) $2-$3")}
-					</p>
-				</div>
-				<Button
-					variant="outline"
-					size="sm"
-					onClick={handleLogout}
-					className="gap-1.5"
-				>
-					<LogOut size={16} />
+				<h1 className="text-2xl font-bold">Dashboard</h1>
+				<Button variant="outline" onClick={handleLogout}>
 					Log Out
 				</Button>
 			</div>
 
-			<div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-				{/* Main functions card */}
-				<Card className="md:col-span-2">
-					<CardHeader>
-						<CardTitle>Tag Everyone</CardTitle>
-						<CardDescription>
-							Notify all members of a group with @everyone
-						</CardDescription>
-					</CardHeader>
-					<CardContent className="space-y-4">
-						<div className="space-y-2">
-							<label htmlFor="group-name" className="text-sm font-medium">
-								Group Name
-							</label>
-							<Input
-								id="group-name"
-								value={groupName}
-								onChange={(e) => setGroupName(e.target.value)}
-								placeholder="Enter group name"
-							/>
-						</div>
-					</CardContent>
-					<CardFooter>
-						<Button onClick={tagEveryone} className="gap-1.5">
-							<AtSign size={18} />
-							Tag Everyone
-						</Button>
-					</CardFooter>
-				</Card>
+			{/* Query Status */}
+			{!isFetching && groups.length === 0 && !error && (
+				<p className="mb-4 text-gray-600">
+					No groups found. Please refresh or check back later.
+				</p>
+			)}
 
-				{/* Stats card */}
-				<Card>
-					<CardHeader>
-						<CardTitle>Your Stats</CardTitle>
-						<CardDescription>Activity overview</CardDescription>
-					</CardHeader>
-					<CardContent className="space-y-4">
-						<div className="flex items-center justify-between">
-							<span className="text-sm flex items-center gap-1.5">
-								<Users size={16} />
-								Groups
-							</span>
-							<span className="font-medium">7</span>
-						</div>
-						<div className="flex items-center justify-between">
-							<span className="text-sm flex items-center gap-1.5">
-								<MessageCircle size={16} />
-								Messages
-							</span>
-							<span className="font-medium">1,243</span>
-						</div>
-						<div className="flex items-center justify-between">
-							<span className="text-sm flex items-center gap-1.5">
-								<AtSign size={16} />
-								Tags Used
-							</span>
-							<span className="font-medium">12</span>
-						</div>
-					</CardContent>
-				</Card>
-
-				{/* Coming soon features */}
-				<Card className="md:col-span-3 bg-secondary/50">
-					<CardHeader>
-						<CardTitle>Coming Soon</CardTitle>
-						<CardDescription>New features on the horizon</CardDescription>
-					</CardHeader>
-					<CardContent>
-						<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-							<div className="bg-background rounded-lg p-4 flex items-center justify-between">
-								<div className="flex items-center gap-2">
-									<div className="h-8 w-8 rounded-md wizz-gradient-bg flex items-center justify-center text-white">
-										<PhoneCall size={18} />
-									</div>
-									<div>
-										<p className="font-medium">Audio Messages</p>
-										<p className="text-xs text-muted-foreground">
-											Voice notes and calls
-										</p>
-									</div>
+			{/* Groups List */}
+			<div className="space-y-4">
+				{groups.map((group) => (
+					<Card key={group.id}>
+						<CardHeader>
+							<CardTitle>{group.name}</CardTitle>
+							<CardDescription>
+								Participants: {group.participantsCount}
+							</CardDescription>
+						</CardHeader>
+						<CardContent>
+							<div className="flex flex-col gap-2">
+								<div className="flex gap-2">
+									<Button
+										onClick={() => handleTagEveryone(group.id)}
+										disabled={
+											actionStatus[group.id]?.tag || actionStatus[group.id]?.dm
+										}
+									>
+										{actionStatus[group.id]?.tag ? "Tagging…" : "Tag Everyone"}
+									</Button>
+									<Button
+										onClick={() => handleSendDM(group.id)}
+										disabled={
+											actionStatus[group.id]?.dm || actionStatus[group.id]?.tag
+										}
+									>
+										{actionStatus[group.id]?.dm ? "Sending DM…" : "Send DM"}
+									</Button>
 								</div>
-								<ChevronRight size={16} className="text-muted-foreground" />
-							</div>
-
-							<div className="bg-background rounded-lg p-4 flex items-center justify-between">
-								<div className="flex items-center gap-2">
-									<div className="h-8 w-8 rounded-md wizz-gradient-bg flex items-center justify-center text-white">
-										<Users size={18} />
-									</div>
-									<div>
-										<p className="font-medium">Group Management</p>
-										<p className="text-xs text-muted-foreground">
-											Create and edit groups
-										</p>
-									</div>
+								<div className="text-sm text-gray-500">
+									<p>
+										<strong>Tag Everyone:</strong> Notifies all members in this
+										group.
+									</p>
+									<p>
+										<strong>Send DM:</strong> Sends a personalized message to
+										each member.
+									</p>
 								</div>
-								<ChevronRight size={16} className="text-muted-foreground" />
 							</div>
-
-							<div className="bg-background rounded-lg p-4 flex items-center justify-between">
-								<div className="flex items-center gap-2">
-									<div className="h-8 w-8 rounded-md wizz-gradient-bg flex items-center justify-center text-white">
-										<MessageCircle size={18} />
-									</div>
-									<div>
-										<p className="font-medium">Message Templates</p>
-										<p className="text-xs text-muted-foreground">
-											Save and reuse messages
-										</p>
-									</div>
-								</div>
-								<ChevronRight size={16} className="text-muted-foreground" />
-							</div>
-						</div>
-					</CardContent>
-				</Card>
+						</CardContent>
+						<CardFooter>
+							{/* Optionally, additional dynamic details could go here */}
+						</CardFooter>
+					</Card>
+				))}
 			</div>
 		</div>
 	);

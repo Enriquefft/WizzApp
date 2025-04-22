@@ -19,9 +19,11 @@ export const env = createEnv({
 	extends: [vercel()],
 	runtimeEnv: {
 		BETTER_AUTH_URL: process.env["BETTER_AUTH_URL"],
+		CHROME_EXECUTABLE_PATH: process.env["CHROME_EXECUTABLE_PATH"],
 		DRIZZLE_DATABASE_URL: process.env["DRIZZLE_DATABASE_URL"],
 		GOOGLE_CLIENT_ID: process.env["GOOGLE_CLIENT_ID"],
 		GOOGLE_CLIENT_SECRET: process.env["GOOGLE_CLIENT_SECRET"],
+		MONGODB_URI: process.env["MONGODB_URI"],
 		NEXT_PUBLIC_APP_URL: process.env["NEXT_PUBLIC_APP_URL"],
 		NEXT_PUBLIC_POSTHOG_KEY: process.env["NEXT_PUBLIC_POSTHOG_KEY"],
 		NEXT_PUBLIC_PROJECT_NAME: process.env["NEXT_PUBLIC_PROJECT_NAME"],
@@ -30,9 +32,11 @@ export const env = createEnv({
 	},
 	server: {
 		BETTER_AUTH_URL: z.string().default(url),
+		CHROME_EXECUTABLE_PATH: z.string().optional(),
 		DRIZZLE_DATABASE_URL: z.string().url(),
 		GOOGLE_CLIENT_ID: z.string(),
 		GOOGLE_CLIENT_SECRET: z.string(),
+		MONGODB_URI: z.string().url(),
 		POLAR_ACCESS_TOKEN: z.string(),
 		POLAR_MODE: z.enum(["sandbox", "production"]).default("sandbox"),
 	},

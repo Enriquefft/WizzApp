@@ -1,31 +1,25 @@
 "use client";
 import Dashboard from "@/components/Dashboard";
 import LandingPage from "@/components/LandingPage";
-import PhoneNumberInput from "@/components/PhoneNumberInput";
 import QRCodeScanner from "@/components/QRCodeScanner";
 import { useApp } from "@/context/AppContext";
 
 const AppLayout: React.FC = () => {
-	const { appState } = useApp();
+	const { appState, qrCode, clientId } = useApp();
 
 	return (
 		<main className="min-h-screen flex flex-col">
+			{/* STATE INFO */}
+			<div className="font-semibold text-center p-4 text-sm text-muted-foreground flex flex-col gap-2">
+				{[appState, qrCode, clientId].map((item) => (
+					<div key={item} className="text-xs">
+						{item}
+					</div>
+				))}
+			</div>
+
 			<div className="flex-1 w-full max-w-7xl mx-auto px-4 py-6 md:py-12 flex flex-col items-center justify-center">
 				{appState === "landing" && <LandingPage />}
-
-				{appState === "login" && (
-					<div className="text-center max-w-md space-y-6 animate-fade-in">
-						<div>
-							<h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-2">
-								Welcome to <span className="wizz-gradient-text">WizzApp</span>
-							</h1>
-							<p className="text-muted-foreground">
-								Enter your phone number to access your dashboard
-							</p>
-						</div>
-						<PhoneNumberInput />
-					</div>
-				)}
 
 				{appState === "qrCode" && (
 					<div className="text-center max-w-md space-y-4 animate-fade-in">

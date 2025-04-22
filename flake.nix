@@ -10,6 +10,7 @@
   outputs = { flakelight, nixpkgs, ... }:
     flakelight ./. {
 
+      nixpkgs.config.allowUnfree = true;
       inputs.nixpkgs = nixpkgs;
 
       devShell.packages = pkgs:
@@ -23,8 +24,13 @@
           lefthook
           commitlint-rs
           biome
+          google-chrome
 
         ];
+      devShell.shellHook = ''
+
+        PUPPETEER_SKIP_DOWNLOAD=1
+      '';
     };
 
 }

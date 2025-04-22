@@ -22,7 +22,14 @@
 	},
 	"files": {
 		"ignoreUnknown": false,
-		"includes": ["**", "!**/node_modules", "!**/.direnv", "!**/.next"]
+		"includes": [
+			"**",
+			"!**/node_modules",
+			"!**/.direnv",
+			"!**/.next",
+			"!**/.wwebjs_auth",
+			"!**/.wwebjs_cache"
+		]
 	},
 	"formatter": {
 		"enabled": true,

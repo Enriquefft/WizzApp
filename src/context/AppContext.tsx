@@ -1,53 +1,57 @@
 "use client";
 import { createContext, type ReactNode, useContext, useState } from "react";
-import { toast } from "sonner";
+import { z } from "zod";
 
-// App states
-type AppState = "landing" | "login" | "qrCode" | "dashboard";
+export type AppState = "landing" | "qrCode" | "dashboard";
 
-// Define the context type
 interface AppContextType {
-	phoneNumber: string;
-	setPhoneNumber: (phone: string) => void;
 	appState: AppState;
 	setAppState: (state: AppState) => void;
-	groupName: string;
-	setGroupName: (name: string) => void;
-	tagEveryone: () => void;
+	qrCode: string;
+	setQrCode: (code: string) => void;
+	clientId: string;
+	setClientId: (id: string) => void;
 }
 
-// Create the context with a default value
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
-// Provider component
+const getInitialClientId = (): string => {
+	if (typeof window !== "undefined") {
+		const existing = sessionStorage.getItem("clientId");
+		if (existing) return existing;
+		const newClientId = Math.random().toString(36).substring(2, 15);
+		sessionStorage.setItem("clientId", newClientId);
+		return newClientId;
+	}
+	return "";
+};
+
 export const AppProvider: React.FC<{ children: ReactNode }> = ({
 	children,
 }) => {
-	const [phoneNumber, setPhoneNumber] = useState<string>("");
-	const [appState, setAppState] = useState<AppState>("landing");
-	const [groupName, setGroupName] = useState<string>("");
-
-	const tagEveryone = () => {
-		if (!groupName.trim()) {
-			toast.error("Please enter a group name");
-			return;
-		}
-
-		toast.success(`Successfully tagged everyone in "${groupName}"`, {
-			description: "All members have been notified",
-		});
-	};
+	let isRegistered: "true" | "false" = "false";
+	if (typeof window !== "undefined") {
+		isRegistered = z
+			.enum(["true", "false"])
+			.nullable()
+			.transform((val) => val ?? "false")
+			.parse(sessionStorage.getItem("registered"));
+	}
+	const [appState, setAppState] = useState<AppState>(
+		isRegistered === "true" ? "dashboard" : "landing",
+	);
+	const [qrCode, setQrCode] = useState<string>("");
+	const [clientId, setClientId] = useState<string>(() => getInitialClientId());
 
 	return (
 		<AppContext.Provider
 			value={{
 				appState,
-				groupName,
-				phoneNumber,
+				clientId,
+				qrCode,
 				setAppState,
-				setGroupName,
-				setPhoneNumber,
-				tagEveryone,
+				setClientId,
+				setQrCode,
 			}}
 		>
 			{children}
@@ -55,10 +59,9 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({
 	);
 };
 
-// Custom hook to use the context
 export const useApp = (): AppContextType => {
 	const context = useContext(AppContext);
-	if (context === undefined) {
+	if (!context) {
 		throw new Error("useApp must be used within an AppProvider");
 	}
 	return context;

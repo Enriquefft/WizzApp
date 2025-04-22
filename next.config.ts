@@ -8,7 +8,7 @@ const nextConfig: NextConfig = {
 		ignoreDuringBuilds: true,
 	},
 	experimental: {
-		typedRoutes: true,
+		// typedRoutes: true,
 	},
 	async rewrites() {
 		return [

@@ -1,8 +1,30 @@
 import { MessageSquare, Phone, QrCode, Shield, Users } from "lucide-react";
-import React from "react";
-import PhoneNumberInput from "./PhoneNumberInput";
+import { useState } from "react";
+import { toast } from "sonner";
+import { getQr } from "@/actions/wsp";
+import { Button } from "@/components/ui/button";
+import { useApp } from "@/context/AppContext";
 
 const LandingPage: React.FC = () => {
+	const { clientId, setAppState, setQrCode } = useApp();
+
+	const [isLoading, setIsLoading] = useState(false);
+
+	const handleConnect = async () => {
+		try {
+			sessionStorage.setItem("registered", "false");
+			setIsLoading(true);
+			const data = await getQr(clientId);
+			sessionStorage.setItem("registered", "true");
+			setQrCode(data);
+			setAppState("qrCode");
+			setIsLoading(false);
+		} catch (error: unknown) {
+			if (error instanceof Error) {
+				toast.error(error.message);
+			}
+		}
+	};
 	return (
 		<div className="min-h-screen flex flex-col">
 			{/* Hero Section */}
@@ -15,9 +37,20 @@ const LandingPage: React.FC = () => {
 					that complement your mobile app
 				</p>
 				<div className="max-w-md w-full">
-					<div className="text-center space-y-6 animate-fade-in">
-						<PhoneNumberInput />
-					</div>
+					<Button
+						className="w-full"
+						size="lg"
+						disabled={isLoading}
+						onClick={handleConnect}
+					>
+						Connect WhatsApp
+					</Button>
+					{isLoading && (
+						<div className="mt-4">
+							<p className="text-muted-foreground">Loading...</p>
+							<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+						</div>
+					)}
 				</div>
 			</section>
 
@@ -95,6 +128,33 @@ const LandingPage: React.FC = () => {
 							<span className="text-xl font-semibold">@everyone</span>
 							<p className="text-center text-muted-foreground mt-4">
 								Notify all group members with a single click
+							</p>
+						</div>
+					</div>
+				</div>
+				<div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center gap-8">
+					<div className="md:w-1/2">
+						<h2 className="text-3xl md:text-4xl font-bold mb-6">
+							DM Everyone for
+							<span className="wizz-gradient-text">Maximum conversions</span>
+						</h2>
+						<p className="text-lg text-muted-foreground mb-6">
+							Our most popular feature lets you instantly DM everyone in.
+							Perfect if you want everyone to see your message.
+						</p>
+						<div className="flex items-center gap-4 mb-8">
+							<Users className="text-primary" size={24} />
+							<span className="font-medium">
+								Maximize your reach with direct messages
+							</span>
+						</div>
+					</div>
+					<div className="md:w-1/2 bg-muted p-6 rounded-lg shadow-lg">
+						<div className="aspect-video bg-card rounded flex flex-col items-center justify-center p-8 border">
+							<Users className="h-16 w-16 text-primary mb-4" />
+							<span className="text-xl font-semibold">DM everyone</span>
+							<p className="text-center text-muted-foreground mt-4">
+								Send direct messages to all group members with ease
 							</p>
 						</div>
 					</div>
