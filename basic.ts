@@ -1,108 +1,28 @@
-import type { GroupChat } from "whatsapp-web.js";
+import { sendMessageToContacts } from "@/lib/wsp";
+import { loadContacts } from "./storage";
 
-const qrcode = require("qrcode-terminal");
+// const groupId = "120363418643487096@g.us"; // founders - reganvi
+// const groupId = "120363195877975691@g.us"; // main - reganvi
+// const groupId = "120363162435047981@g.us"; // internal - reganvi
+// const groupId = "120363274638084601@g.us"; // grouty
 
-import { getClient } from "@/lib/wsp";
-
-const client = await getClient();
-
-// const groupId = "120363195877975691@g.us"; // main
-// const groupId = "120363162435047981@g.us"; // internal
+// const contacts = await getGroupContacts({
+// 	localAuth: true,
+// 	groupId,
+// 	stayAlive: false,
+// });
 //
-const groupId = "120363274638084601@g.us"; // grouty
+// await saveContacts(contacts);
 
-// --- Group Chat Related Types & Functions ---
-export type GroupDetail = {
-	id: string;
-	name: string;
-	participantsCount: number;
-};
+const contacts = await loadContacts();
+
 const message =
-	"♻✅Estamos lanzando la primera e-commerce digital de materiales reciclables para empresas Perú.\n\n✅ Transparencia total\n✅ Seguridad garantizada\n✅ Buenos precios\n\n Registrate en el siguiente link, recibiras atencion personalizada y escribenos o visista reganvi.pe si tienes alguna duda.\n\n🔗 https://tally.so/r/w7EgJ0";
-client.on("ready", async () => {
-	console.log("Client is ready!");
+	"Estimado miembro del grupo de Reganvi,\n\n Queremos informarle que, a partir de la fecha, el señor Víctor Palma ya no forma parte de la empresa Reganvi. Agradecemos su valioso aporte durante su tiempo con nosotros, especialmente en la gestión de ventas y compras, que contribuyó al fortalecimiento de nuestros procesos.\n\n Con el objetivo de optimizar nuestra comunicación y fortalecer la coordinación entre todos, hemos creado un nuevo espacio para el equipo de comercialización.\n\n Les invitamos a unirse a nuestra comunidad de anuncios a través del siguiente enlace:\n 👉 https://chat.whatsapp.com/LVnxRHGU1Cg8lgypxMRVeh\n\n En esta, continuaremos trabajando con el compromiso de siempre, promoviendo la economía circular y asegurando un entorno colaborativo y profesional para todos.\n\n Agradecemos su comprensión y apoyo en esta nueva etapa.\n\n Equipo Reganvi";
 
-	const chat = (await client.getChatById(groupId)) as GroupChat;
-	if (!chat.isGroup)
-		throw new Error("The provided ID does not belong to a group.");
-	if (!chat.participants || chat.participants.length === 0)
-		throw new Error("Could not fetch group participants.");
-
-	// Build mention text and array of mention identifiers.
-	const mentions = chat.participants.map(
-		(participant) => `${participant.id.user}@c.us`,
-	);
-	const mentionText = chat.participants
-		.map((participant) => `@${participant.id.user}`)
-		.join(" ");
-
-	const fullMessage = `${message}\n\n${mentionText}`;
-	await chat.sendMessage(fullMessage, { mentions });
-
-	// const chats = await client.getChats();
-	// console.log(`Found ${chats.length} chats`);
-	// const groups = getGroupChats(chats);
-	// console.log(`Found ${groups.length} groups`);
-	// const groupDetails = groups.map((group: GroupChat) => ({
-	// 	id: group.id._serialized,
-	// 	name: group.name,
-	// 	participantsCount: group.participants?.length || 0,
-	// }));
-	//
-	// console.log("Group Details:", groupDetails);
-	// const chat = (await client.getChatById(groupId)) as GroupChat;
-	// if (!chat.isGroup)
-	// 	throw new Error("The provided ID does not belong to a group.");
-	// if (!chat.participants || chat.participants.length === 0)
-	// 	throw new Error("Could not fetch group participants.");
-	//
-	// console.log(
-	// 	`Sending message to ${chat.participants.length} participants of "${chat.name}"...`,
-	// );
-	//
-	// const results = {
-	// 	errors: [] as Array<{ participant: string; error: string }>,
-	// 	failed: 0,
-	// 	sent: 0,
-	// 	total: chat.participants.length,
-	// };
-	//
-	// // remove first 200 from participants
-	// const participants = chat.participants.slice(200);
-	//
-	// for (const participant of participants) {
-	// 	try {
-	// 		// Skip sending a DM to the WhatsApp account used by the client.
-	// 		if (participant.id.user === client.info.wid.user) {
-	// 			console.log("Skipping self...");
-	// 			continue;
-	// 		}
-	// 		// Delay to avoid potential rate limits.
-	// 		await new Promise((resolve) => setTimeout(resolve, 1000));
-	// 		await client.sendMessage(participant.id._serialized, message);
-	// 		console.log(`Message sent to ${participant.id._serialized}`);
-	// 		results.sent++;
-	// 	} catch (err: unknown) {
-	// 		if (err instanceof Error) {
-	// 			console.error(
-	// 				`Failed to send message to ${participant.id._serialized}: ${err.message}`,
-	// 			);
-	// 			results.failed++;
-	// 			results.errors.push({
-	// 				error: err.message,
-	// 				participant: participant.id._serialized,
-	// 			});
-	// 		}
-	// 	}
-	// }
-	//
-	// console.log(
-	// 	`Completed sending messages. Successful: ${results.sent}, Failed: ${results.failed}`,
-	// );
+await sendMessageToContacts({
+	contacts,
+	exclude: ["51925531984", "51994898110"],
+	localAuth: true,
+	messages: [message],
+	stayAlive: false,
 });
-
-client.on("qr", (qr: string) => {
-	qrcode.generate(qr, { small: true });
-});
-
-client.initialize();
